@@ -20,7 +20,6 @@
 
 #include "erl_nif.h"
 #include <wiringPi.h>
-#include <lcd.h>
 #include <wiringShift.h>
 #include <softPwm.h>
 #include <wiringSerial.h>
@@ -101,102 +100,6 @@ pull_up_dn_control_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
     return atom_ok;
 }
 
-static ERL_NIF_TERM
-lcd_init_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
-{
-    int num_rows, num_cols, num_bits, rs_pin, e_pin;
-    int d0_pin, d1_pin, d2_pin, d3_pin, d4_pin, d5_pin, d6_pin, d7_pin;
-    int handle;
-    if (!enif_get_int(env, argv[0],  &num_rows) ||
-        !enif_get_int(env, argv[1],  &num_cols) ||
-        !enif_get_int(env, argv[2],  &num_bits) ||
-        !enif_get_int(env, argv[3],  &rs_pin)   ||
-        !enif_get_int(env, argv[4],  &e_pin)    ||
-        !enif_get_int(env, argv[5],  &d0_pin)   ||
-        !enif_get_int(env, argv[6],  &d1_pin)   ||
-        !enif_get_int(env, argv[7],  &d2_pin)   ||
-        !enif_get_int(env, argv[8],  &d3_pin)   ||
-        !enif_get_int(env, argv[9],  &d4_pin)   ||
-        !enif_get_int(env, argv[10], &d5_pin)   ||
-        !enif_get_int(env, argv[11], &d6_pin)   ||
-        !enif_get_int(env, argv[12], &d7_pin))
-    {
-        return enif_make_badarg(env);
-    }
-    handle = lcdInit(num_rows, num_cols, num_bits, rs_pin, e_pin,
-                     d0_pin, d1_pin, d2_pin, d3_pin,
-                     d4_pin, d5_pin, d6_pin, d7_pin);
-    return enif_make_int(env, handle);
-}
-
-static ERL_NIF_TERM
-lcd_home_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
-{
-    int handle;
-    if (!enif_get_int(env, argv[0], &handle))
-    {
-        return enif_make_badarg(env);
-    }
-    lcdHome(handle);
-    return atom_ok;
-}
-
-static ERL_NIF_TERM
-lcd_clear_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
-{
-    int handle;
-    if (!enif_get_int(env, argv[0], &handle))
-    {
-        return enif_make_badarg(env);
-    }
-    lcdClear(handle);
-    return atom_ok;
-}
-
-static ERL_NIF_TERM
-lcd_position_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
-{
-    int handle, x, y;
-    if (!enif_get_int(env, argv[0], &handle) ||
-        !enif_get_int(env, argv[1], &x)      ||
-        !enif_get_int(env, argv[2], &y))
-    {
-        return enif_make_badarg(env);
-    }
-    lcdPosition(handle, x, y);
-    return atom_ok;
-}
-
-static ERL_NIF_TERM
-lcd_put_char_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
-{
-    int handle, character;
-    if (!enif_get_int(env, argv[0], &handle) ||
-        !enif_get_int(env, argv[1], &character))
-    {
-        return enif_make_badarg(env);
-    }
-    lcdPutchar(handle, (uint8_t)character);
-    return atom_ok;
-}
-
-static ERL_NIF_TERM
-lcd_puts_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
-{
-    int handle, str_len;
-    if (!enif_get_int(env, argv[0], &handle) ||
-        !enif_get_int(env, argv[1], &str_len))
-    {
-        return enif_make_badarg(env);
-    }
-    char str[str_len+1];
-    if (!enif_get_string(env, argv[2], str, sizeof(str), ERL_NIF_LATIN1))
-    {
-        return enif_make_badarg(env);
-    }
-    lcdPuts(handle, str);
-    return atom_ok;
-}
 
 static ERL_NIF_TERM
 shift_in_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[])
@@ -432,13 +335,6 @@ static ErlNifFunc nif_funcs[] =
         {"pwm_write_nif",           2, pwm_write_nif},
         {"digital_read_nif",        1, digital_read_nif},
         {"pull_up_dn_control_nif",  2, pull_up_dn_control_nif},
-        // LCD
-        {"lcd_init_nif",           13, lcd_init_nif},
-        {"lcd_home_nif",            1, lcd_home_nif},
-        {"lcd_clear_nif",           1, lcd_clear_nif},
-        {"lcd_position_nif",        3, lcd_position_nif},
-        {"lcd_put_char_nif",        2, lcd_put_char_nif},
-        {"lcd_puts_nif",            3, lcd_puts_nif},
         // shift
         {"shift_in_nif",            3, shift_in_nif},
         {"shift_out_nif",           4, shift_out_nif},
